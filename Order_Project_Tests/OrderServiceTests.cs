@@ -13,6 +13,8 @@ namespace Order_Project_Tests
         private const string _keyboard = "Keyboard";
         private const int _quantity = 2;
         private const int _updatedQuantity = 3;
+        private const int _negativeQuantity = -1;
+        private const int _zeroQuantity = 0;
         private const int _missingOrderId = 999;
         private readonly Mock<IInventoryService> _inventoryMock;
         private readonly Mock<IPaymentService> _paymentMock;
@@ -322,8 +324,8 @@ namespace Order_Project_Tests
         /// The UpdateOrder method should return false.
         /// </summary>
         [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
+        [InlineData(_zeroQuantity)]
+        [InlineData(_negativeQuantity)]
         public void UpdateOrder_NonPositiveQuantity_ReturnsFalse(int newQuantity)
         {
             //arrange
