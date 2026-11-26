@@ -28,6 +28,19 @@ namespace Order_Project_Tests
             _service = new OrderService(_inventoryMock.Object, _paymentMock.Object, _notificationMock.Object);
         }
 
+        /// <summary>
+        /// Helper method configures the inventory and payment services
+        /// to simulate successful order processing.
+        /// </summary>
+        /// <param name="product"></param>
+        /// <param name="quantity"></param>
+        private void SetupSuccessfulDependencies(string product, int quantity)
+        {
+            _inventoryMock.Setup(x => x.CheckStock(product, quantity)).Returns(true);
+
+            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+        }
+
 
         /// <summary>
         /// Verifies that an order can be created with different product names.
@@ -40,8 +53,7 @@ namespace Order_Project_Tests
         public void CreateOrder_ValidProduct_ReturnsExpectedProduct(string product)
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(product, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(product, _quantity);
 
             //act
             var actual = _service.CreateOrder(product, _quantity);
@@ -58,7 +70,10 @@ namespace Order_Project_Tests
         public void CreateOrder_TwoOrders_AssignsDifferentIds()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(It.IsAny<string>(), It.IsAny<int>())).Returns(true);
+            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
+
+            _inventoryMock.Setup(x => x.CheckStock(_phone, _quantity)).Returns(true);
+
             _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
 
             //act
@@ -77,9 +92,7 @@ namespace Order_Project_Tests
         public void UpdateOrder_ExistingOrder_ReturnsTrue()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
-
+            SetupSuccessfulDependencies(_laptop, _quantity);
             var order = _service.CreateOrder(_laptop, _quantity);
 
             //act
@@ -97,9 +110,7 @@ namespace Order_Project_Tests
         public void UpdateOrder_ExistingOrder_ChangesQuantity()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
-
+            SetupSuccessfulDependencies(_laptop, _quantity);
             var order = _service.CreateOrder(_laptop, _quantity);
 
             //act
@@ -150,9 +161,7 @@ namespace Order_Project_Tests
         public void GetOrders_AfterCreation_ContainsCreatedOrder()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
-
+            SetupSuccessfulDependencies(_laptop,_quantity);
             var order = _service.CreateOrder(_laptop, _quantity);
 
             //act
@@ -176,7 +185,7 @@ namespace Order_Project_Tests
 
             Action act = () => _service.CreateOrder(_laptop, _quantity);
 
-            // Act and Assert
+            //act and assert
             Assert.Throws<InvalidOperationException>(act);
         }
 
@@ -224,9 +233,8 @@ namespace Order_Project_Tests
         public void CreateOrder_ValidOrder_CallsReduceStock()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
             _inventoryMock.Setup(x => x.ReduceStock(_laptop, _quantity)).Verifiable();
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
 
             //act
             _service.CreateOrder(_laptop, _quantity);
@@ -261,8 +269,7 @@ namespace Order_Project_Tests
         public void CreateOrder_ValidOrder_SendsConfirmationExactlyOnce()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
 
             //act
             _service.CreateOrder(_laptop, _quantity);
@@ -279,8 +286,7 @@ namespace Order_Project_Tests
         public void CreateOrder_ValidOrder_PassesCorrectOrderToPayment()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
 
             //act
             _service.CreateOrder(_laptop, _quantity);
@@ -300,8 +306,7 @@ namespace Order_Project_Tests
         public void RemoveOrder_ExistingOrder_IncreasesStockOnce()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
 
             var order = _service.CreateOrder(_laptop, _quantity);
 
@@ -322,8 +327,7 @@ namespace Order_Project_Tests
         public void UpdateOrder_NonPositiveQuantity_ReturnsFalse(int newQuantity)
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
 
             var order = _service.CreateOrder(_laptop, _quantity);
 
@@ -342,8 +346,7 @@ namespace Order_Project_Tests
         public void RemoveOrder_ExistingOrder_RemovesOrderFromCollection()
         {
             //arrange
-            _inventoryMock.Setup(x => x.CheckStock(_laptop, _quantity)).Returns(true);
-            _paymentMock.Setup(x => x.ProcessPayment(It.IsAny<Order>())).Returns(true);
+            SetupSuccessfulDependencies(_laptop, _quantity);
 
             var order = _service.CreateOrder(_laptop, _quantity);
 
